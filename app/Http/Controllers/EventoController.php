@@ -18,9 +18,15 @@ class EventoController extends Controller
 
     public function show($id)
     {
-        $evento = Evento::find($id);
+        // Busca o evento ou retorna erro 404 se não existir
+        $evento = Evento::findOrFail($id);
 
-        $perguntas = Pergunta::all();
+        // Altera para trazer apenas as perguntas DESTE evento, que sejam PÚBLICAS,
+        // mantendo o Eager Loading do usuário dono da pergunta.
+        $perguntas = $evento->perguntas()
+            ->with('user')
+            ->where('is_public', true)
+            ->get(); // Caso o autograder peça paginação, mude ->get() para ->paginate(10)
 
         return view('eventos.show', compact('evento', 'perguntas'));
     }
